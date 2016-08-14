@@ -102,9 +102,23 @@ public class ${entity.classNameDao} extends AbstractDao<${entity.className}, ${e
     public static void createTable(SQLiteDatabase db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"${entity.tableName}\" (" + //
+<#assign pks = []>
+<#list entity.propertiesColumns as property>
+         <#if property.constraints??><#if property.constraints?contains("PRIMARY KEY")><#assign pks = pks + [property.columnName]></#if></#if>
+</#list>
+<#if pks?size gt 1>
+<#list entity.propertiesColumns as property>
+                "\"${property.columnName}\" ${property.columnType}<#if property.constraints??> ${property.constraints?replace("PRIMARY KEY","")} </#if>," + // ${property_index}: ${property.propertyName}
+</#list>
+                "PRIMARY KEY (" +
+<#list pks as pk>
+                "\"${pk}\" <#if pk_has_next>," +<#else>) ON CONFLICT REPLACE);");</#if>
+</#list>
+<#else>
 <#list entity.propertiesColumns as property>
                 "\"${property.columnName}\" ${property.columnType}<#if property.constraints??> ${property.constraints} </#if><#if property_has_next>," +<#else>);");</#if> // ${property_index}: ${property.propertyName}
 </#list>
+</#if>
 <#if entity.indexes?has_content >
         // Add Indexes
 <#list entity.indexes as index>
