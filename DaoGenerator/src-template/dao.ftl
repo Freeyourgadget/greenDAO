@@ -20,7 +20,7 @@ along with greenDAO Generator.  If not, see <http://www.gnu.org/licenses/>.
 <#assign toBindType = {"Boolean":"Long", "Byte":"Long", "Short":"Long", "Int":"Long", "Long":"Long", "Float":"Double", "Double":"Double", "String":"String", "ByteArray":"Blob", "Date": "Long" } />
 <#assign toCursorType = {"Boolean":"Short", "Byte":"Short", "Short":"Short", "Int":"Int", "Long":"Long", "Float":"Float", "Double":"Double", "String":"String", "ByteArray":"Blob", "Date": "Long"  } />
 package ${entity.javaPackageDao};
-
+import android.os.Build;
 <#if entity.toOneRelations?has_content || entity.incomingToManyRelations?has_content>
 import java.util.List;
 </#if>
@@ -112,8 +112,9 @@ public class ${entity.classNameDao} extends AbstractDao<${entity.className}, ${e
 </#list>
                 "PRIMARY KEY (" +
 <#list pks as pk>
-                "\"${pk}\" <#if pk_has_next>," +<#else>) ON CONFLICT REPLACE);");</#if>
+                "\"${pk}\" <#if pk_has_next>," +<#else>) ON CONFLICT REPLACE)" + ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) ? " WITHOUT ROWID;" : ";")</#if>
 </#list>
+        );
 <#else>
 <#list entity.propertiesColumns as property>
                 "\"${property.columnName}\" ${property.columnType}<#if property.constraints??> ${property.constraints} </#if><#if property_has_next>," +<#else>);");</#if> // ${property_index}: ${property.propertyName}
